@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Birthday Surprise</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+:root{--night:#0d0a2b;--plum:#3a0f35;--rose:#ff7eb6;--gold:#f6d98b;--ink:#fff;--page:#0b0b0d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--page:#0b0b0d}}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0;background:var(--page);font-family:system-ui,sans-serif;color:var(--ink)}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#stage{position:relative;height:min(82vh,820px);aspect-ratio:9/16;max-width:96vw;overflow:hidden;border-radius:18px;background:var(--night)}
+#plum{position:absolute;inset:0;background:radial-gradient(circle at 50% 55%,#5a1650,var(--plum) 70%);opacity:0;transition:opacity 1.2s}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+#heart{position:absolute;left:50%;top:22%;width:16%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 14px #ff7eb6aa);transition:transform .35s,opacity .35s}
+#heart.pop{transform:translate(-50%,-50%) scale(1.8);opacity:0}
+#bow{position:absolute;left:6%;top:58%;width:30%}
+#arrow{position:absolute;left:0;top:0;width:34%;transform-origin:0 50%;opacity:0}
+#cake{position:absolute;left:50%;bottom:14%;width:62%;transform:translateX(-50%)}
+#cake .part{opacity:0}
+#cake.up .part{animation:drop .8s cubic-bezier(.3,1.5,.5,1) var(--d) both}
+@keyframes drop{from{opacity:0;transform:translateY(-380px)}to{opacity:1;transform:translateY(0)}}
+.flame{transform-origin:50% 100%;animation:fl .18s infinite alternate}
+@keyframes fl{to{transform:scale(.88,1.12) rotate(3deg)}}
+.balloon{position:absolute;bottom:-18%;width:11%;aspect-ratio:.82;border-radius:50% 50% 48% 48%;opacity:0}
+.balloon::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:90px;background:#fff6}
+.balloon.go{animation:rise 7s ease-out forwards}
+@keyframes rise{0%{opacity:0;transform:translateY(0)}12%{opacity:1}100%{opacity:1;transform:translateY(-135%) translateX(var(--dx,0))}}
+#title{white-space:nowrap;position:absolute;left:0;right:0;top:35%;text-align:center;font:400 100px/1.3 "Great Vibes","Snell Roundhand","Brush Script MT",cursive;background:linear-gradient(180deg,#fff,var(--gold) 60%,#e8b653);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px #f6d98bcc);clip-path:inset(0 100% 0 0);transition:clip-path 2.6s linear}
+#title.on{clip-path:inset(0 0 0 0)}
+#cap{position:absolute;left:0;right:0;top:3%;text-align:center;font-weight:600;letter-spacing:.02em}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#lock{position:absolute;inset:0;z-index:6;background:radial-gradient(circle at 50% 40%,#2a1450,var(--night) 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+#lock svg{width:44px;height:44px}
+#lock p{margin:0;max-width:24ch}
+#lock input{width:100%;max-width:220px;padding:10px 14px;border-radius:12px;border:1px solid #ffffff44;background:#ffffff12;color:#fff;font:inherit;text-align:center;letter-spacing:.06em}
+#lock input:focus-visible{outline:2px solid var(--gold)}
+#lock #open{background:var(--rose);color:#2a0b22;border:0;font-weight:600;padding:10px 26px}
+#lerr{min-height:1.2em;color:#ffb3c9;font-size:.9em}
+#lock.bad input{animation:shk .35s}
+@keyframes shk{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#intro{position:absolute;inset:0;z-index:5;background:radial-gradient(circle at 50% 40%,#1c1450,var(--night) 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+#intro h1{font:400 clamp(44px,10vh,76px)/1 "Great Vibes","Snell Roundhand",cursive;margin:0;color:var(--gold)}
+#intro p{margin:0;opacity:.8;max-width:26ch}
+#intro input{width:100%;max-width:240px;padding:10px 14px;border-radius:12px;border:1px solid #ffffff44;background:#ffffff12;color:#fff;font:inherit;text-align:center}
+#intro input:focus-visible{outline:2px solid var(--gold)}
+#intro #start{background:var(--rose);color:#2a0b22;border:0;font-weight:600;padding:10px 26px}
+#who{position:absolute;left:0;right:0;top:49%;text-align:center;font:400 clamp(34px,8vh,64px)/1.2 "Great Vibes","Snell Roundhand",cursive;color:#fff3c4;text-shadow:0 2px 8px #000c,0 0 14px #f6d98b99;opacity:0;transition:opacity 1.5s}
+#who.on{opacity:1}
+button{background:none;border:1px solid #ffffff55;color:#fff;padding:8px 18px;border-radius:99px;font:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.balloon.go{animation-duration:1s}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cap">Birthday Surprise</div>
+  <div id="lock"><svg viewBox="0 0 24 24" fill="none" stroke="#f6d98b" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><p>Enter the birthday (day/month) to open the surprise</p><input id="pw" inputmode="numeric" placeholder="DD/MM" maxlength="10" autocomplete="off"><div id="lerr" role="alert"></div><button id="open">Open</button></div>
+  <div id="intro"><h1>Birthday Surprise</h1><p>Type a name and send a little surprise.</p><input id="nm" placeholder="Name" maxlength="24" autocomplete="off"><button id="start">Start</button></div>
+  <div id="plum"></div>
+  <canvas id="cv"></canvas>
+  <svg id="heart" viewBox="0 0 32 29"><path fill="#ff7eb6" d="M16 28C5 20 0 14 0 8a8 8 0 0 1 16-2 8 8 0 0 1 16 2c0 6-5 12-16 20z"/></svg>
+
+  <svg id="bow" viewBox="0 0 120 160"><defs><linearGradient id="wood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a4b2a"/><stop offset=".5" stop-color="#d99a5b"/><stop offset="1" stop-color="#8a4b2a"/></linearGradient></defs><path d="M82 6C70 10 60 18 52 30C28 58 28 102 52 130C60 142 70 150 82 154" fill="none" stroke="url(#wood)" stroke-width="8" stroke-linecap="round"/><path d="M82 6C70 10 60 18 52 30C28 58 28 102 52 130C60 142 70 150 82 154" fill="none" stroke="#f6d98b" stroke-width="1.6" stroke-linecap="round" opacity=".7" transform="translate(-1 0)"/><path d="M35 66C32 76 32 84 35 94" fill="none" stroke="#c99a3f" stroke-width="12" stroke-linecap="round"/><path d="M29 70L41 72M29 76L41 78M29 82L41 84M29 88L41 90" stroke="#6b3a1f" stroke-width="1.4"/><circle cx="80" cy="8" r="3.5" fill="#f6d98b"/><circle cx="80" cy="152" r="3.5" fill="#f6d98b"/><path id="str" d="M80 8L80 80L80 152" fill="none" stroke="#fff" stroke-width="1.6"/></svg>
+  <svg id="arrow" viewBox="0 0 100 12"><line x1="2" y1="6" x2="90" y2="6" stroke="#ffd7e8" stroke-width="3"/><path d="M90 0L100 6L90 12z" fill="#ff7eb6"/><path d="M2 6L12 0M2 6L12 12M10 6L20 0M10 6L20 12" stroke="#ff7eb6" stroke-width="2"/></svg>
+
+  <svg id="cake" viewBox="0 0 300 260">
+    <g class="part" style="--d:0s"><ellipse cx="150" cy="238" rx="140" ry="18" fill="#c99a3f"/></g>
+    <g class="part" style="--d:.45s"><rect x="30" y="170" width="240" height="64" rx="10" fill="#ff8cc0"/><ellipse cx="150" cy="170" rx="120" ry="16" fill="#ffc2dc"/></g>
+    <g class="part" style="--d:.9s"><rect x="65" y="116" width="170" height="56" rx="10" fill="#ff74b0"/><ellipse cx="150" cy="116" rx="85" ry="13" fill="#ffd0e4"/></g>
+    <g class="part" style="--d:1.35s"><rect x="100" y="70" width="100" height="48" rx="9" fill="#ff8cc0"/><ellipse cx="150" cy="70" rx="50" ry="10" fill="#ffe0ee"/></g>
+    <g class="part" style="--d:1.8s"><rect x="145" y="36" width="10" height="34" rx="3" fill="#fff3c4"/></g>
+    <g class="part" style="--d:2.1s"><path class="flame" d="M150 12C158 22 158 32 150 34C142 32 142 22 150 12z" fill="#ffb347"/></g>
+  </svg>
+
+  <div id="title">Happy Birthday</div>
+  <div id="who"></div>
+</div>
+<div class="row"><button id="again">Replay</button><button id="share">Copy link</button></div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'),cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  var heart=document.getElementById('heart'),arrow=document.getElementById('arrow'),bow=document.getElementById('bow');
+  var cake=document.getElementById('cake'),plum=document.getElementById('plum'),title=document.getElementById('title');
+  var str=document.getElementById('str');
+  var W,H,parts=[],raining=false,timers=[],raf;
+  var cols=['#ff7eb6','#ff9ec9','#ffc2dc','#ff5c9d','#f6d98b'];
+  var balloonCols=['radial-gradient(circle at 35% 30%,#fff,#f3b6d0 60%)','radial-gradient(circle at 35% 30%,#fff3c4,#d9a93f 65%)','radial-gradient(circle at 35% 30%,#fff,#ffd1e3 60%)','radial-gradient(circle at 35% 30%,#fff,#e9c3ff 60%)'];
+
+  function size(){var r=stage.getBoundingClientRect(),d=window.devicePixelRatio||1;W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);}
+  window.addEventListener('resize',function(){size();fit();});
+  function fit(){title.style.fontSize='100px';var r=document.createRange();r.selectNodeContents(title);var tw=r.getBoundingClientRect().width;if(tw>0)title.style.fontSize=Math.floor(100*stage.getBoundingClientRect().width*.94/tw)+'px';}
+
+  function drawHeart(x,y,s,rot,c,a){
+    ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.scale(s,s);ctx.globalAlpha=a;ctx.fillStyle=c;
+    ctx.beginPath();ctx.moveTo(0,6);ctx.bezierCurveTo(-14,-4,-8,-14,0,-6);ctx.bezierCurveTo(8,-14,14,-4,0,6);ctx.fill();ctx.restore();
+  }
+  function spawn(x,y,vx,vy,burst){
+    parts.push({x:x,y:y,vx:vx,vy:vy,s:.6+Math.random()*1.3,r:Math.random()*6,vr:(Math.random()-.5)*.08,c:cols[Math.random()*cols.length|0],life:burst?70:999,a:1,g:burst?.12:.02});
+  }
+  function burst(){
+    var x=W*.5,y=H*.22;
+    for(var i=0;i<46;i++){var an=Math.random()*6.28,sp=2+Math.random()*5;spawn(x,y,Math.cos(an)*sp,Math.sin(an)*sp-1,true);}
+  }
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    if(raining&&Math.random()<.35)spawn(Math.random()*W,-10,(Math.random()-.5)*.6,.8+Math.random()*1.4,false);
+    parts=parts.filter(function(p){
+      p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.r+=p.vr;p.life--;
+      if(p.life<20)p.a=Math.max(0,p.life/20);
+      drawHeart(p.x,p.y,p.s*3.2,p.r,p.c,p.a*.55);
+      return p.life>0&&p.y<H+20;
+    });
+    raf=requestAnimationFrame(loop);
+  }
+  function at(ms,fn){timers.push(setTimeout(fn,ms));}
+
+  function balloons(){
+    for(var i=0;i<7;i++){
+      var b=document.createElement('div');b.className='balloon';
+      b.style.left=(6+i*13+Math.random()*4)+'%';b.style.background=balloonCols[i%4];
+      b.style.setProperty('--dx',(Math.random()*30-15)+'px');b.style.animationDelay=(i*.35)+'s';
+      stage.insertBefore(b,title);
+      (function(el){setTimeout(function(){el.classList.add('go');},30);})(b);
+    }
+  }
+
+  function play(){
+    timers.forEach(clearTimeout);timers=[];cancelAnimationFrame(raf);
+    stage.querySelectorAll('.balloon').forEach(function(b){b.remove();});
+    parts=[];raining=false;size();fit();
+    heart.classList.remove('pop');cake.classList.remove('up');plum.style.opacity=0;title.classList.remove('on');
+    bow.style.transition='none';bow.style.transform='';arrow.style.transition='none';arrow.style.opacity=0;str.setAttribute('d','M80 8L80 80L80 152');
+    loop();
+
+    // 1. draw the bow back
+    at(500,function(){
+      str.setAttribute('d','M80 8L112 80L80 152');
+      var w=W*.3,cx=W*.06+w/2,cy=H*.58+w*2/3,tx=W*.5,ty=H*.22;var ang=Math.atan2(ty-cy,tx-cx);bow.style.transition='transform .6s ease';bow.style.transform='rotate('+(ang+Math.PI)+'rad)';
+      var sx=cx-Math.cos(ang)*.433*w,sy=cy-Math.sin(ang)*.433*w;
+      arrow.style.left=sx+'px';arrow.style.top=(sy-W*.34*.06)+'px';
+      arrow.style.transform='rotate('+ang+'rad)';arrow.style.opacity=1;
+      arrow._d={tr:Math.hypot(tx-sx,ty-sy)-W*.34+W*.03,ang:ang};
+    });
+    // 2. release
+    at(1500,function(){
+      var d=arrow._d;str.setAttribute('d','M80 8L80 80L80 152');
+      arrow.style.transition='transform .45s cubic-bezier(.5,0,1,.6)';
+      arrow.style.transform='translate('+Math.cos(d.ang)*d.tr+'px,'+Math.sin(d.ang)*d.tr+'px) rotate('+d.ang+'rad)';
+    });
+    // 3. hit: heart bursts into hearts
+    at(1950,function(){
+      arrow.style.opacity=0;heart.classList.add('pop');plum.style.opacity=1;burst();raining=true;
+    });
+    // 4. cake rises
+    at(2500,function(){cake.classList.add('up');});
+    // 5. balloons
+    at(3600,balloons);
+    // 6. title writes itself in gold, then the name fades in
+    at(4500,function(){title.classList.add('on');});at(7200,function(){who.classList.add('on');});
+  }
+  var intro=document.getElementById('intro'),inp=document.getElementById('nm'),who=document.getElementById('who');
+  try{var q=new URLSearchParams(location.search).get('name');if(q)inp.value=q.slice(0,24);}catch(e){}
+  function go(){who.classList.remove('on');who.textContent=inp.value.trim();intro.style.display='none';play();}
+  var lock=document.getElementById('lock'),pw=document.getElementById('pw'),lerr=document.getElementById('lerr');
+  function hh(s){var a=0xdeadbeef,b=0x41c6ce57;for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677);}a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return (4294967296*(2097151&b)+(a>>>0)).toString(36);}
+  function tryOpen(){var p=pw.value.split(/\D+/).filter(Boolean),s;
+    if(p.length>=2)s=('0'+p[0]).slice(-2)+('0'+p[1]).slice(-2);else s=pw.value.replace(/\D/g,'');
+    if(hh(s)==='v0oxkif11h'){lock.style.display='none';inp.value='shosho';go();}
+    else{lerr.textContent='Wrong date. Try again.';lock.classList.remove('bad');void lock.offsetWidth;lock.classList.add('bad');}}
+  document.getElementById('open').addEventListener('click',tryOpen);
+  pw.addEventListener('keydown',function(e){if(e.key==='Enter')tryOpen();});
+  document.getElementById('start').addEventListener('click',go);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')go();});
+  document.getElementById('again').addEventListener('click',go);
+  document.getElementById('share').addEventListener('click',function(){var b=this,u=location.href.split('?')[0]+'?name='+encodeURIComponent(inp.value.trim());
+    var p;try{p=navigator.clipboard.writeText(u);}catch(e){p=Promise.reject();}
+    p.then(function(){b.textContent='Link copied';setTimeout(function(){b.textContent='Copy link';},1800);},function(){window.prompt('Copy this link',u);});});
+  size();fit();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+})();
+</script>
+</body>
+</html>
